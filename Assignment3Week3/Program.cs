@@ -4,7 +4,6 @@ namespace assignment8ex1
 {
     class Program
     {
-        // Declaring the delegate
         public delegate void SongDelegate();
 
         public class HereComesTheSun
