@@ -1,50 +1,79 @@
 ﻿using System;
 
-namespace Assignment8ex2
+namespace delegatesAndEvents
 {
-    public class MathSolutions
+    public delegate void RaceWinnerDelegate(int winner);
+
+    public class Race
     {
-        public double GetSum(double x, double y)
-        {
-            return x + y;
-        }
-        public double GetProduct(double a, double b)
-        {
-            return a * b;
-        }
-        public void GetSmaller(double a, double b)
-        {
-            if (a < b)
-                Console.WriteLine($" {a} is smaller than {b}");
-            else if (b < a)
-                Console.WriteLine($" {b} is smaller than {a}");
-            else
-                Console.WriteLine($" {b} is equal to {a}");
-        }
+        //delegate event obj
+        public event RaceWinnerDelegate RaceWinnerEvent;
 
-        //custom delegate for GetProduct
-        public delegate double ProductDelegate(double a, double b);
-
-        static void Main(string[] args)
+        public void Racing(int contestants, int laps)
         {
-            MathSolutions answer = new MathSolutions();
+            Console.WriteLine("Ready\nSet\nGo!");
             Random r = new Random();
-            double num1 = Math.Round(r.NextDouble() * 100);
-            double num2 = Math.Round(r.NextDouble() * 100);
+            int[] participants = new int[contestants];
+            bool done = false;
+            int champ = -1;
 
-            //func delegate for GetSum
-            Func<double, double, double> sumFunc = answer.GetSum;
-            double sumResult = sumFunc(num1, num2);
-            Console.WriteLine($" {num1} + {num2} = {sumResult}");
+            while (!done)
+            {
+                for (int i = 0; i < contestants; i++)
+                {
+                    if (participants[i] <= laps)
+                    {
+                        participants[i] += r.Next(1, 5);
+                    }
+                    else
+                    {
+                        champ = i;
+                        done = true;
+                        continue;
+                    }
+                }
+            }
 
-            //custom delegate for GetProduct
-            ProductDelegate productDelegate = answer.GetProduct;
-            double productResult = productDelegate(num1, num2);
-            Console.WriteLine($" {num1} * {num2} = {productResult}");
+            TheWinner(champ);
+        }
 
-            //action delegate for GetSmaller method
-            Action<double, double> smallerAction = answer.GetSmaller;
-            smallerAction(num1, num2);
+        private void TheWinner(int champ)
+        {
+            Console.WriteLine("We have a winner!");
+            //invoking event obj
+            RaceWinnerEvent?.Invoke(champ);
+        }
+    }
+
+    class Program
+    {
+        public static void Main()
+        {
+            Race round1 = new Race();
+
+            round1.RaceWinnerEvent += footRace;
+
+            round1.Racing(5, 50);
+
+            round1.RaceWinnerEvent -= footRace;
+            round1.RaceWinnerEvent += carRace;
+
+            round1.Racing(5, 50);
+
+            //bike race event using lambda
+            round1.RaceWinnerEvent -= carRace;
+            round1.RaceWinnerEvent += (int winner) => { Console.WriteLine($"Biker number {winner} is the winner."); };
+
+            round1.Racing(5, 50);
+        }
+
+        public static void carRace(int winner)
+        {
+            Console.WriteLine($"Car number {winner} is the winner.");
+        }
+        public static void footRace(int winner)
+        {
+            Console.WriteLine($"Racer number {winner} is the winner.");
         }
     }
 }
